@@ -1,0 +1,339 @@
+=encoding utf8
+
+=head1 NAME
+
+ocaml.m4 - Autoconf macros for OCaml
+
+=head1 SUMMARY
+
+ AC_PROG_OCAML
+ AC_PROG_FINDLIB
+ AC_PROG_OCAMLLEX
+ AC_PROG_OCAMLYACC
+ AC_PROG_CAMLP4
+ AC_CHECK_OCAML_PKG([name])
+ AC_CHECK_OCAML_MODULE(VARIABLE,NAME,MODULE,INCLUDE-PATHS)
+ AC_CHECK_OCAML_WORD_SIZE
+
+=head1 DESCRIPTION
+
+B<ocaml.m4> is a file containing standard, useful autoconf macros for
+detecting the OCaml, findlib, OCaml packages, and so on in your
+autoconf-generated ./configure scripts.
+
+To begin using these macros, you will need to copy the C<ocaml.m4>
+file (usually located at C</usr/share/aclocal/ocaml.m4>) to the
+autoconf macros directory in your project.  Normally this is the
+C<m4/> directory in your project, but the directory can be changed
+using the C<AC_CONFIG_MACRO_DIR(DIR)> directive.  If you have just
+created the C<m4/> directory, then you may also need to do:
+
+ aclocal -I m4
+
+You can then add any of the macros described below to your
+C<configure.ac> (or C<configure.in>). Almost every OCaml project
+should use C<AC_PROG_OCAML> first and probably C<AC_PROG_FINDLIB>
+right after it.
+
+This manual page does not describe how to use autoconf.  For that you
+should read the detailed autoconf info file (C<info autoconf>).
+
+=head1 AC_PROG_OCAML
+
+This macro detects which tools of the usual OCaml toolchain are
+available. It defines and substitutes the following variables:
+
+ OCAMLC          set to the name of the bytecode compiler
+                   (eg. "ocamlc" or "ocamlc.opt"), or "no" if
+                   no OCaml installation was found
+ OCAMLOPT        the name of the native-code compiler, eg. "ocamlopt",
+                   "ocamlopt.opt" or "no"
+ OCAMLBEST       "byte" (if only the bytecode compiler is available)
+                   or "opt" (if both bytecode and native code compilers
+		   are available)
+ OCAMLDEP        the name of the dependency resolver, eg. "ocamldep"
+ OCAMLMKTOP      the name of ocamlmktop
+ OCAMLMKLIB      the name of ocamlmklib
+ OCAMLDOC        the name of ocamldoc
+ OCAMLBUILD      the name of ocamlbuild
+ OCAMLLIB        the OCaml library path (eg. C</usr/lib/ocaml/>)
+ OCAMLVERSION    the compiler version (eg. C<3.11.0>)
+
+=head2 Detecting if OCaml is installed
+
+Unlike old versions of these macros, C<AC_PROG_OCAML> does I<not> exit
+if no OCaml installation is detected.  Therefore if you want to detect
+if OCaml is installed you have to do something like this:
+
+ AC_PROG_OCAML
+ if test "$OCAMLC" = "no"; then
+   AC_MSG_ERROR([You must install the OCaml compiler])
+ fi
+
+This behaviour and usage pattern are consistent with other macros of
+the C<AC_PROG_*>) family.
+
+=head2 Cross-compiling
+
+If the configure script is invoked for cross-compiling then
+C<AC_PROG_OCAML> will detect the cross-compiler versions of the OCaml
+compiler, eg. C<OCAMLC=i686-pc-mingw32-ocamlc> etc.  This happens
+automatically, and for most purposes you don't need to worry about it.
+
+=head1 AC_PROG_FINDLIB
+
+This macro checks for the presence of the ocamlfind program (part of
+findlib).  It defines and substitutes C<OCAMLFIND> to the name of the
+ocamlfind program, or C<no> if not found.
+
+Note that this macro does not fail if ocamlfind is not found.  If you
+want to force the user to install findlib, you should do:
+
+ AC_PROG_FINDLIB
+ if test "$OCAMLFIND" = "no"; then
+   AC_MSG_ERROR([You must install OCaml findlib (the ocamlfind command)])
+ fi
+
+See also C<AC_CHECK_OCAML_PKG>.
+
+=head1 AC_PROG_OCAMLLEX
+
+This checks for the ocamllex program and sets C<OCAMLLEX> to the name
+of the program (eg. C<ocamllex> or C<ocamllex.opt>), or C<no> if not
+found.
+
+=head1 AC_PROG_OCAMLYACC
+
+This checks for the ocamlyacc program and sets C<OCAMLYACC> to the
+name of the program, or C<no> if not found.
+
+=head1 AC_PROG_CAMLP4
+
+This checks for camlp4, and checks that the version matches the
+compiler version found previously.  It sets C<CAMLP4> to the name of
+the basic camlp4 program, or C<no> if not found.
+
+The macro also checks for other tools of the camlp4 suite like
+camlp4o, camlp4orf, etc. For each of them, a fully capitalized
+variable is set to the tool name (or C<no> if not found); all variable
+are substituted for when filling .in files. The full list of tools and
+respective variable names is as follows:
+
+ camlp4        CAMLP4
+ camlp4boot    CAMLP4BOOT
+ camlp4o       CAMLP4O
+ camlp4of      CAMLP4OF
+ camlp4oof     CAMLP4OOF
+ camlp4orf     CAMLP4ORF
+ camlp4prof    CAMLP4PROF
+ camlp4r       CAMLP4R
+ camlp4rf      CAMLP4RF
+
+=head1 AC_CHECK_OCAML_PKG
+
+This is the main macro that can be used to detect the presence of
+OCaml findlib packages.  This macro uses ocamlfind to look up findlib
+packages (and thus requires that findlib itself has been installed,
+and that the package has been properly packaged with a META file etc.)
+If you want to find an OCaml findlib package which hasn't been
+installed with findlib then you should try using
+C<AC_CHECK_OCAML_MODULE> instead.
+
+ AC_CHECK_OCAML_PKG([name])
+
+checks for an OCaml findlib package with the given name. If found, it
+defines and substitutes the variable C<OCAML_PKG_name> where the
+C<name> part is substituted for the package name by replacing all
+dashes with underscores.
+
+For example,
+
+ AC_CHECK_OCAML_PKG([xml-light])
+
+will set C<OCAML_PKG_xml_light> to either C<xml-light> or C<no>.
+
+To have the configure script fail if a package is not installed, do:
+
+ AC_CHECK_OCAML_PKG([foo])
+ if test "$OCAML_PKG_foo" = "no"; then
+   AC_MSG_ERROR([Please install OCaml findlib module 'foo'.])
+ fi
+
+In your Makefile.in, use the substitution variable in conjunction with
+ocamlfind, eg:
+
+ .ml.cmo:
+   $(OCAMLFIND) ocamlc -package @OCAML_PKG_foo@ -c $< -o $@
+
+Note that also in the substitution variable dashes are replaced with
+underscores.
+
+=head2 Checking for alternative findlib package names
+
+In the (unlikely) case where the same library corresponds to different
+findlib package names on different systems, you can improve
+portability by checking for the alternative names passing a second
+argument to C<AC_CHECK_OCAML_PKG>:
+
+ AC_CHECK_OCAML_PKG(PKGNAME,ALTERNATIVE-NAMES)
+
+The behaviour is the same as before if C<PKGNAME> is found. Otherwise
+all names in C<ALTERNATIVE-NAMES> are tested in turn as findlib
+package names. If one is found, it is set as the value set by the
+macro and substituted in .in files; otherwise C<no> is set.
+
+Note that the variable name is determined by C<PKGNAME>, while the
+value depends on the actual alternative name found.
+
+For example, to detect the camlzip findlib package, either called
+C<zip> or C<camlzip>, and to store the found value in the
+C<OCAML_PKG_zip> variable you can do in your configure.ac:
+
+ AC_CHECK_OCAML_PKG(zip,camlzip)
+
+and have a portable Makefile.in build line such as:
+
+ .ml.cmo:
+   $(OCAMLFIND) ocamlc -package @OCAML_PKG_zip@ -c $< -o $@
+
+=head1 AC_CHECK_OCAML_MODULE(VARIABLE,NAME,MODULE,INCLUDE-PATHS)
+
+C<AC_CHECK_OCAML_MODULE> is the hairier alternative to
+C<AC_CHECK_OCAML_PKG>.  You should always use C<AC_CHECK_OCAML_PKG>
+and ocamlfind/findlib if possible.
+
+The parameters are:
+
+=over
+
+=item VARIABLE
+
+This is the environment variable that is set.  It will either be set
+to the include path, or to C<no> if the module was not found.
+
+=item NAME
+
+This is the name of the module we are looking for.  This parameter is
+just used for printing messages, and does not affect how the module is
+found.
+
+=item MODULE
+
+This should be an OCaml module name, representing the module name
+being looked up.  You can put sub-modules here, eg.
+C<CalendarLib.Date>
+
+=item INCLUDE-PATHS
+
+This is the default list of include directories to search, eg.
+C<+calendar>
+
+=back
+
+For example, the following code will check for the OCaml Calendar
+module, and will distinguish between version 1 and version 2 of this
+module (which have incompatible APIs).
+
+ AC_CHECK_OCAML_PKG(calendar)
+ AC_CHECK_OCAML_MODULE(is_calendar2,calendar,[CalendarLib.Date],[+calendar])
+
+After the above code has run, variables C<OCAML_PKG_calendar> and
+C<is_calendar2> will be set as follows:
+
+ OCAML_PKG_calendar  is_calendar2  Result
+ 
+ yes                 +calendar     Calendar v2 is installed
+ yes                 no            Calendar v1 is installed
+ no                  no            No Calendar module installed
+
+=head1 AC_CHECK_OCAML_WORD_SIZE
+
+This checks the word size of the OCaml compiler, and sets
+C<OCAML_WORD_SIZE> to either C<32> or C<64>.
+
+=head1 SEE ALSO
+
+L<autoconf(1)>,
+L<http://ocaml-autoconf.forge.ocamlcore.org>,
+L<http://caml.inria.fr/>
+
+=head1 FILES
+
+=over
+
+=item *
+
+/usr/share/aclocal/ocaml.m4
+
+=back
+
+=head1 AUTHORS
+
+Various people have contributed to these macros over many years:
+
+=over
+
+=item *
+
+Olivier Andrieu
+
+=item *
+
+Jean-Christophe Filliâtre
+
+=item *
+
+Richard W.M. Jones
+
+=item *
+
+Georges Mariano
+
+=item *
+
+Jim Meyering
+
+=item *
+
+Stefano Zacchiroli
+
+=back
+
+=head1 LICENSE
+
+ Copyright © 2009      Richard W.M. Jones
+ Copyright © 2009      Stefano Zacchiroli
+ Copyright © 2000-2005 Olivier Andrieu
+ Copyright © 2000-2005 Jean-Christophe Filliâtre
+ Copyright © 2000-2005 Georges Mariano
+ 
+ All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ 
+ * Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+ * The names of the contributors may not be used to endorse or promote
+ products derived from this software without specific prior written
+ permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ''AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=head1 REPORTING BUGS
+
+Please report bugs to the authors at the project page:
+L<http://forge.ocamlcore.org/projects/ocaml-autoconf/>, using the
+forge bug tracker L<http://forge.ocamlcore.org/tracker/?group_id=69>.
