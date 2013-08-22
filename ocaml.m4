@@ -11,7 +11,7 @@ dnl For documentation, please read the ocaml.m4 man page.
 AC_DEFUN([AC_PROG_OCAML],
 [dnl
   # checking for ocamlc
-  AC_CHECK_TOOL([OCAMLC],[ocamlc],[no])
+  AC_CHECK_TOOLS([OCAMLC],[ocamlc.opt ocamlc],[no])
 
   if test "$OCAMLC" != "no"; then
      OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version* *\(.*\)$|\1|p'`
@@ -28,14 +28,14 @@ AC_DEFUN([AC_PROG_OCAML],
      AC_SUBST([OCAMLLIB])
 
      # checking for ocamlopt
-     AC_CHECK_TOOL([OCAMLOPT],[ocamlopt],[no])
+     AC_CHECK_TOOLS([OCAMLOPT],[ocamlopt.opt ocamlopt],[no])
      OCAMLBEST=byte
      if test "$OCAMLOPT" = "no"; then
 	AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
      else
 	TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
 	if test "$TMPVERSION" != "$OCAMLVERSION" ; then
-	    AC_MSG_RESULT([versions differs from ocamlc; ocamlopt discarded.])
+	    AC_MSG_RESULT([versions differs from $OCAMLC; $OCAMLOPT discarded.])
 	    OCAMLOPT=no
 	else
 	    OCAMLBEST=opt
@@ -44,34 +44,8 @@ AC_DEFUN([AC_PROG_OCAML],
 
      AC_SUBST([OCAMLBEST])
 
-     # checking for ocamlc.opt
-     AC_CHECK_TOOL([OCAMLCDOTOPT],[ocamlc.opt],[no])
-     if test "$OCAMLCDOTOPT" != "no"; then
-	TMPVERSION=`$OCAMLCDOTOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
-	if test "$TMPVERSION" != "$OCAMLVERSION" ; then
-	    AC_MSG_RESULT([versions differs from ocamlc; ocamlc.opt discarded.])
-	else
-	    OCAMLC=$OCAMLCDOTOPT
-	fi
-     fi
-
-     # checking for ocamlopt.opt
-     if test "$OCAMLOPT" != "no" ; then
-	AC_CHECK_TOOL([OCAMLOPTDOTOPT],[ocamlopt.opt],[no])
-	if test "$OCAMLOPTDOTOPT" != "no"; then
-	   TMPVERSION=`$OCAMLOPTDOTOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
-	   if test "$TMPVERSION" != "$OCAMLVERSION" ; then
-	      AC_MSG_RESULT([version differs from ocamlc; ocamlopt.opt discarded.])
-	   else
-	      OCAMLOPT=$OCAMLOPTDOTOPT
-	   fi
-        fi
-     fi
-
      AC_SUBST([OCAMLOPT])
   fi
-
-  AC_SUBST([OCAMLC])
 
   # checking for ocaml toplevel
   AC_CHECK_TOOL([OCAML],[ocaml],[no])
