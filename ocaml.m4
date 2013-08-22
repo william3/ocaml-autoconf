@@ -48,7 +48,7 @@ AC_DEFUN([AC_PROG_OCAML],
   fi
 
   # checking for ocaml toplevel
-  AC_CHECK_TOOL([OCAML],[ocaml],[no])
+  AC_CHECK_PROG([OCAML],[ocaml],[ocaml],[no])
 
   # checking for ocamldep
   AC_CHECK_TOOL([OCAMLDEP],[ocamldep],[no])
@@ -60,7 +60,7 @@ AC_DEFUN([AC_PROG_OCAML],
   AC_CHECK_TOOL([OCAMLMKLIB],[ocamlmklib],[no])
 
   # checking for ocamldoc
-  AC_CHECK_TOOL([OCAMLDOC],[ocamldoc],[no])
+  AC_CHECK_PROG([OCAMLDOC],[ocamldoc],[ocamldoc],[no])
 
   # checking for ocamlbuild
   AC_CHECK_TOOL([OCAMLBUILD],[ocamlbuild],[no])
@@ -70,20 +70,12 @@ AC_DEFUN([AC_PROG_OCAML],
 AC_DEFUN([AC_PROG_OCAMLLEX],
 [dnl
   # checking for ocamllex
-  AC_CHECK_TOOL([OCAMLLEX],[ocamllex],[no])
-  if test "$OCAMLLEX" != "no"; then
-    AC_CHECK_TOOL([OCAMLLEXDOTOPT],[ocamllex.opt],[no])
-    if test "$OCAMLLEXDOTOPT" != "no"; then
-	OCAMLLEX=$OCAMLLEXDOTOPT
-    fi
-  fi
-  AC_SUBST([OCAMLLEX])
+  AC_CHECK_PROGS([OCAMLLEX],[ocamllex.opt ocamllex],[no])
 ])
 
 AC_DEFUN([AC_PROG_OCAMLYACC],
 [dnl
-  AC_CHECK_TOOL([OCAMLYACC],[ocamlyacc],[no])
-  AC_SUBST([OCAMLYACC])
+  AC_CHECK_PROG([OCAMLYACC],[ocamlyacc],[ocamlyacc],[no])
 ])
 
 
